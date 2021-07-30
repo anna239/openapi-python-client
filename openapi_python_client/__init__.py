@@ -87,6 +87,7 @@ class Project:
             package_dir=self.package_dir,
             package_description=self.package_description,
             package_version=self.version,
+            openapi_version=self.openapi.version,
             project_name=self.project_name,
             project_dir=self.project_dir,
         )

@@ -1,0 +1,66 @@
+# {{ project_name }} `{{ package_version }}`
+{{ package_description }}
+
+⚠️This SDK generated using `{{ openapi_version }}` [OpenAPI](https://hub.jetbrains.com/api/rest/openapi.json) version by [openapi-python-client](https://github.com/mtovts/openapi-python-client/tree/fix/overriding-parameters) which is under development.
+ It may have some bugs. Use with caution.⚠️
+
+If you find a bug or want to request a new feature, please create an issue in [YouTrack](https://youtrack.jetbrains.com/newIssue?project=JT&c=State%20Open&c=Subsystem%20Python%20client%20library).
+
+### It will be fixed\added soon:
+- [ ] Generators for endpoints with query parameters `skip`, `top`.
+- [ ] Several data model not generating now. It leads to generating only `*_detailed` APIs which return raw [`Response`](\{{ package_name }}\types.py) object.
+
+
+## Usage
+First, create a client:
+
+```python
+from {{ package_name }} import Client
+
+client = Client(hub_base_url="https://hub.jetbrains.com/api/rest")
+```
+
+If the endpoints you're going to hit require authentication, use `AuthenticatedClient` instead:
+
+```python
+import os
+
+from {{ package_name }} import AuthenticatedClient
+
+
+client = AuthenticatedClient(hub_base_url="https://hub.jetbrains.com/api/rest", token=os.getenv("HUB_TOKEN"))
+```
+
+Now call your endpoint and use your models:
+
+```python
+from {{ package_name }}.models import MyDataModel
+from {{ package_name }}.api.my_tag import get_my_data_model
+from {{ package_name }}.types import Response
+
+my_data: MyDataModel = get_my_data_model.sync(client=client)
+# or if you need more info (e.g. status_code)
+response: Response[MyDataModel] = get_my_data_model.sync_detailed(client=client)
+```
+
+Or do the same thing with an async version:
+
+```python
+from {{ package_name }}.models import MyDataModel
+from {{ package_name }}.api.my_tag import get_my_data_model
+from {{ package_name }}.types import Response
+
+my_data: MyDataModel = await get_my_data_model.asyncio(client=client)
+response: Response[MyDataModel] = await get_my_data_model.asyncio_detailed(client=client)
+```
+
+Things to know:
+1. Every path/method combo becomes a Python module with four functions:
+    1. `sync`: Blocking request that returns parsed data (if successful) or `None`
+    1. `sync_detailed`: Blocking request that always returns a `Request`, optionally with `parsed` set if the request was successful.
+    1. `asyncio`: Like `sync` but the async instead of blocking
+    1. `asyncio_detailed`: Like `sync_detailed` by async instead of blocking
+     
+1. All path/query params, and bodies become method arguments.
+1. If your endpoint had any tags on it, the first tag will be used as a module name for the function (my_tag above)
+1. Any endpoint which did not have a tag will be in `{{ package_name }}.api.default`    
