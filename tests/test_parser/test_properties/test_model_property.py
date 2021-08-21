@@ -7,7 +7,6 @@ from openapi_python_client import Config
 from openapi_python_client.parser.errors import PropertyError
 from openapi_python_client.parser.properties import StringProperty
 
-
 # @pytest.mark.parametrize(
 #     "no_optional,nullable,required,json,expected",
 #     [

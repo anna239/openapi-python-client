@@ -44,8 +44,12 @@ class ModelProperty(Property):
             {
                 "from typing import Dict",
                 "from typing import cast",
-                f"if TYPE_CHECKING:"
-                f"    from {prefix}models.{self.class_info.module_name} import {self.class_info.name}",
+                f"""
+if TYPE_CHECKING:
+    from {prefix}models.{self.class_info.module_name} import {self.class_info.name}
+else:
+    {self.class_info.name} = '{self.class_info.name}'
+                """,
             }
         )
         return imports
