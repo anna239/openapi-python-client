@@ -1788,6 +1788,30 @@
       },
       "None":  {
         "type": "object"
+      },
+      "CircularModel1": {
+        "type": "object",
+        "properties": {
+          "circular_model_2": {
+            "$ref": "#/components/schemas/CircularModel2"
+          }
+        }
+      },
+      "CircularModel2": {
+        "type": "object",
+        "properties": {
+          "circular_model_1": {
+            "$ref": "#/components/schemas/CircularModel1"
+          }
+        }
+      },
+      "RecursiveModel": {
+        "type": "object",
+        "properties": {
+          "recursive_model": {
+            "$ref": "#/components/schemas/RecursiveModel"
+          }
+        }
       }
     }
   }
