@@ -90,11 +90,17 @@ def update_schemas_with_data(
 
     prop: Union[PropertyError, Property]
     prop, schemas = property_from_data(
-        data=data, name=ref_path, schemas=schemas, required=True, parent_name="", config=config
+        data=data, name=ref_path, schemas=schemas, required=True, parent_name="", config=config  # , inline=False
     )
 
     if isinstance(prop, PropertyError):
         return prop
 
-    schemas = attr.evolve(schemas, classes_by_reference={ref_path: prop, **schemas.classes_by_reference})
+    schemas = attr.evolve(
+        schemas,
+        classes_by_reference={
+            **schemas.classes_by_reference,
+            ref_path: prop,
+        },
+    )
     return schemas

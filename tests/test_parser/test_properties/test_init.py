@@ -866,76 +866,76 @@ class TestStringBasedProperty:
         assert p == string_property_factory(name=name, required=required, nullable=nullable)
 
 
-class TestBuildSchemas:
-    def test_skips_references_and_keeps_going(self, mocker):
-        from openapi_python_client.parser.properties import Schemas, build_schemas
-        from openapi_python_client.schema import Reference, Schema
-
-        components = {"a_ref": Reference.construct(), "a_schema": Schema.construct()}
-        update_schemas_with_data = mocker.patch(f"{MODULE_NAME}.update_schemas_with_data")
-        parse_reference_path = mocker.patch(f"{MODULE_NAME}.parse_reference_path")
-        config = Config()
-
-        result = build_schemas(components=components, schemas=Schemas(), config=config)
-        # Should not even try to parse a path for the Reference
-        parse_reference_path.assert_called_once_with("#/components/schemas/a_schema")
-        update_schemas_with_data.assert_called_once_with(
-            ref_path=parse_reference_path.return_value,
-            config=config,
-            data=components["a_schema"],
-            schemas=Schemas(
-                errors=[PropertyError(detail="Reference schemas are not supported.", data=components["a_ref"])]
-            ),
-        )
-        assert result == update_schemas_with_data.return_value
-
-    def test_records_bad_uris_and_keeps_going(self, mocker):
-        from openapi_python_client.parser.properties import Schemas, build_schemas
-        from openapi_python_client.schema import Schema
-
-        components = {"first": Schema.construct(), "second": Schema.construct()}
-        update_schemas_with_data = mocker.patch(f"{MODULE_NAME}.update_schemas_with_data")
-        parse_reference_path = mocker.patch(
-            f"{MODULE_NAME}.parse_reference_path", side_effect=[PropertyError(detail="some details"), "a_path"]
-        )
-        config = Config()
-
-        result = build_schemas(components=components, schemas=Schemas(), config=config)
-        parse_reference_path.assert_has_calls(
-            [
-                call("#/components/schemas/first"),
-                call("#/components/schemas/second"),
-            ]
-        )
-        update_schemas_with_data.assert_called_once_with(
-            ref_path="a_path",
-            config=config,
-            data=components["second"],
-            schemas=Schemas(errors=[PropertyError(detail="some details", data=components["first"])]),
-        )
-        assert result == update_schemas_with_data.return_value
-
-    def test_retries_failing_properties_while_making_progress(self, mocker):
-        from openapi_python_client.parser.properties import Schemas, build_schemas
-        from openapi_python_client.schema import Schema
-
-        components = {"first": Schema.construct(), "second": Schema.construct()}
-        update_schemas_with_data = mocker.patch(
-            f"{MODULE_NAME}.update_schemas_with_data", side_effect=[PropertyError(), Schemas(), PropertyError()]
-        )
-        parse_reference_path = mocker.patch(f"{MODULE_NAME}.parse_reference_path")
-        config = Config()
-
-        result = build_schemas(components=components, schemas=Schemas(), config=config)
-        parse_reference_path.assert_has_calls(
-            [
-                call("#/components/schemas/first"),
-                call("#/components/schemas/second"),
-                call("#/components/schemas/first"),
-            ]
-        )
-        assert update_schemas_with_data.call_count == 3
-        assert result.errors == [PropertyError()]
+# class TestBuildSchemas:
+#     def test_skips_references_and_keeps_going(self, mocker):
+#         from openapi_python_client.parser.properties import Schemas, build_schemas
+#         from openapi_python_client.schema import Reference, Schema
+#
+#         components = {"a_ref": Reference.construct(), "a_schema": Schema.construct()}
+#         update_schemas_with_data = mocker.patch(f"{MODULE_NAME}.update_schemas_with_data")
+#         parse_reference_path = mocker.patch(f"{MODULE_NAME}.parse_reference_path")
+#         config = Config()
+#
+#         result = build_schemas(components=components, schemas=Schemas(), config=config)
+#         # Should not even try to parse a path for the Reference
+#         parse_reference_path.assert_called_once_with("#/components/schemas/a_schema")
+#         update_schemas_with_data.assert_called_once_with(
+#             ref_path=parse_reference_path.return_value,
+#             config=config,
+#             data=components["a_schema"],
+#             schemas=Schemas(
+#                 errors=[PropertyError(detail="Reference schemas are not supported.", data=components["a_ref"])]
+#             ),
+#         )
+#         assert result == update_schemas_with_data.return_value
+#
+#     def test_records_bad_uris_and_keeps_going(self, mocker):
+#         from openapi_python_client.parser.properties import Schemas, build_schemas
+#         from openapi_python_client.schema import Schema
+#
+#         components = {"first": Schema.construct(), "second": Schema.construct()}
+#         update_schemas_with_data = mocker.patch(f"{MODULE_NAME}.update_schemas_with_data")
+#         parse_reference_path = mocker.patch(
+#             f"{MODULE_NAME}.parse_reference_path", side_effect=[PropertyError(detail="some details"), "a_path"]
+#         )
+#         config = Config()
+#
+#         result = build_schemas(components=components, schemas=Schemas(), config=config)
+#         parse_reference_path.assert_has_calls(
+#             [
+#                 call("#/components/schemas/first"),
+#                 call("#/components/schemas/second"),
+#             ]
+#         )
+#         update_schemas_with_data.assert_called_once_with(
+#             ref_path="a_path",
+#             config=config,
+#             data=components["second"],
+#             schemas=Schemas(errors=[PropertyError(detail="some details", data=components["first"])]),
+#         )
+#         assert result == update_schemas_with_data.return_value
+#
+#     def test_retries_failing_properties_while_making_progress(self, mocker):
+#         from openapi_python_client.parser.properties import Schemas, build_schemas
+#         from openapi_python_client.schema import Schema
+#
+#         components = {"first": Schema.construct(), "second": Schema.construct()}
+#         update_schemas_with_data = mocker.patch(
+#             f"{MODULE_NAME}.update_schemas_with_data", side_effect=[PropertyError(), Schemas(), PropertyError()]
+#         )
+#         parse_reference_path = mocker.patch(f"{MODULE_NAME}.parse_reference_path")
+#         config = Config()
+#
+#         result = build_schemas(components=components, schemas=Schemas(), config=config)
+#         parse_reference_path.assert_has_calls(
+#             [
+#                 call("#/components/schemas/first"),
+#                 call("#/components/schemas/second"),
+#                 call("#/components/schemas/first"),
+#             ]
+#         )
+#         assert update_schemas_with_data.call_count == 3
+#         assert result.errors == [PropertyError()]
 
 
 def test_build_enum_property_conflict(mocker):

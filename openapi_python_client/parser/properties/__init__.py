@@ -9,6 +9,7 @@ __all__ = [
     "property_from_data",
 ]
 
+from copy import deepcopy
 from itertools import chain
 from typing import Any, ClassVar, Dict, Generic, Iterable, Iterator, List, Optional, Set, Tuple, TypeVar, Union
 
@@ -508,6 +509,7 @@ def _property_from_data(
     schemas: Schemas,
     parent_name: str,
     config: Config,
+    # inline: bool = True
 ) -> Tuple[Union[Property, PropertyError], Schemas]:
     """Generate a Property from the OpenAPI dictionary representation of it"""
     name = utils.remove_string_escapes(name)
@@ -520,7 +522,6 @@ def _property_from_data(
         return _property_from_ref(
             name=name, required=required, parent=data, data=sub_data[0], schemas=schemas, config=config
         )
-
     if data.enum:
         return build_enum_property(
             data=data,
@@ -531,6 +532,10 @@ def _property_from_data(
             parent_name=parent_name,
             config=config,
         )
+    # if not inline:
+    #     data = deepcopy(data)
+    #     data.properties = None
+
     if data.anyOf or data.oneOf:
         return build_union_property(
             data=data, name=name, required=required, schemas=schemas, parent_name=parent_name, config=config
@@ -600,6 +605,7 @@ def property_from_data(
     schemas: Schemas,
     parent_name: str,
     config: Config,
+    # inline: bool = True
 ) -> Tuple[Union[Property, PropertyError], Schemas]:
     """
     Build a Property from an OpenAPI schema or reference. This Property represents a single input or output for a
@@ -626,7 +632,12 @@ def property_from_data(
     """
     try:
         return _property_from_data(
-            name=name, required=required, data=data, schemas=schemas, parent_name=parent_name, config=config
+            name=name,
+            required=required,
+            data=data,
+            schemas=schemas,
+            parent_name=parent_name,
+            config=config,  # , inline=inline
         )
     except ValidationError:
         return PropertyError(detail="Failed to validate default value", data=data), schemas
@@ -639,8 +650,75 @@ def build_schemas(
     to_process: Iterable[Tuple[str, Union[oai.Reference, oai.Schema]]] = components.items()
     still_making_progress = True
     errors: List[PropertyError] = []
+    all_of: Dict[str, oai.Schema] = {}
+
+    schemas = build_reusable_schemas(components=components, schemas=schemas, config=config)
 
     # References could have forward References so keep going as long as we are making progress
+    while still_making_progress:
+        still_making_progress = False
+        errors = []
+        next_round = []
+        # Only accumulate errors from the last round, since we might fix some along the way
+        for name, data in to_process:
+            if isinstance(data, oai.Reference):
+                schemas.errors.append(PropertyError(data=data, detail="Reference schemas are not supported."))
+                continue
+            if data.allOf:
+                all_of.update({name: data})
+                continue
+            ref_path = parse_reference_path(f"#/components/schemas/{name}")
+            if isinstance(ref_path, ParseError):
+                schemas.errors.append(PropertyError(detail=ref_path.detail, data=data))
+                continue
+            schemas_or_err = update_schemas_with_data(ref_path=ref_path, data=data, schemas=schemas, config=config)
+            if isinstance(schemas_or_err, PropertyError):
+                next_round.append((name, data))
+                errors.append(schemas_or_err)
+                continue
+            schemas = schemas_or_err
+            still_making_progress = True
+        to_process = next_round
+
+    still_making_progress2 = True
+    while still_making_progress2:
+        still_making_progress2 = False
+        errors = []
+        next_round = {}
+        # Only accumulate errors from the last round, since we might fix some along the way
+        for name, data in all_of.items():
+            ref_path = parse_reference_path(f"#/components/schemas/{name}")
+            if isinstance(ref_path, ParseError):
+                schemas.errors.append(PropertyError(detail=ref_path.detail, data=data))
+                continue
+            schemas_or_err = update_schemas_with_data(ref_path=ref_path, data=data, schemas=schemas, config=config)
+            if isinstance(schemas_or_err, PropertyError):
+                next_round.update({name: data})
+                errors.append(schemas_or_err)
+                continue
+            schemas = schemas_or_err
+            still_making_progress2 = True
+        all_of = next_round
+
+    schemas.errors.extend(errors)
+    return schemas
+
+
+# def process_schema(name: str, data: Union[oai.Reference, oai.Schema], schemas: Schemas, config: Config):
+
+
+def build_reusable_schemas(
+    components: Dict[str, Union[oai.Reference, oai.Schema]],
+    schemas: Schemas,
+    config: Config,
+) -> Schemas:
+    """Adds classes with empty properties. This allows to reference these classes.
+    Properties will be filled in later.
+    """
+    to_process: Iterable[Tuple[str, Union[oai.Reference, oai.Schema]]] = components.items()
+    still_making_progress = True
+    errors: List[PropertyError] = []
+
     while still_making_progress:
         still_making_progress = False
         errors = []
@@ -654,6 +732,8 @@ def build_schemas(
             if isinstance(ref_path, ParseError):
                 schemas.errors.append(PropertyError(detail=ref_path.detail, data=data))
                 continue
+            data = deepcopy(data)
+            data.properties = None
             schemas_or_err = update_schemas_with_data(ref_path=ref_path, data=data, schemas=schemas, config=config)
             if isinstance(schemas_or_err, PropertyError):
                 next_round.append((name, data))
