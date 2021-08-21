@@ -1,4 +1,4 @@
-from typing import Any, Dict, Type, TypeVar, Tuple, Optional, BinaryIO, TextIO
+from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar, Tuple, Optional, BinaryIO, TextIO
 
 {% if model.additional_properties %}
 from typing import List
@@ -11,6 +11,7 @@ import json
 {% endif %}
 
 from ..types import UNSET, Unset
+
 
 {% for relative in model.relative_imports %}
 {{ relative }}

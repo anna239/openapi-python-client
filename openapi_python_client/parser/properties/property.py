@@ -67,11 +67,11 @@ class Property:
         if no_optional or (self.required and not self.nullable):
             return type_string
         if self.required and self.nullable:
-            return f"Optional[{type_string}]"
+            return f"Optional['{type_string}']"
         if not self.required and self.nullable:
-            return f"Union[Unset, None, {type_string}]"
+            return f"Union[Unset, None, '{type_string}']"
 
-        return f"Union[Unset, {type_string}]"
+        return f"Union[Unset, '{type_string}']"
 
     def get_instance_type_string(self) -> str:
         """Get a string representation of runtime type that should be used for `isinstance` checks"""
