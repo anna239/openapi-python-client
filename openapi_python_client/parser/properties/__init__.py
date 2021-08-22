@@ -509,19 +509,19 @@ def _property_from_data(
     schemas: Schemas,
     parent_name: str,
     config: Config,
-    # inline: bool = True
 ) -> Tuple[Union[Property, PropertyError], Schemas]:
     """Generate a Property from the OpenAPI dictionary representation of it"""
     name = utils.remove_string_escapes(name)
     if isinstance(data, oai.Reference):
         return _property_from_ref(name=name, required=required, parent=None, data=data, schemas=schemas, config=config)
 
-    # A union of a single reference should just be passed through to that reference (don't create copy class)
-    sub_data = (data.allOf or []) + data.anyOf + data.oneOf
-    if len(sub_data) == 1 and isinstance(sub_data[0], oai.Reference):
-        return _property_from_ref(
-            name=name, required=required, parent=data, data=sub_data[0], schemas=schemas, config=config
-        )
+    # # A union of a single reference should just be passed through to that reference (don't create copy class)
+    # sub_data = (data.allOf or []) + data.anyOf + data.oneOf
+    # if len(sub_data) == 1 and isinstance(sub_data[0], oai.Reference):
+    #     return _property_from_ref(
+    #         name=name, required=required, parent=data, data=sub_data[0], schemas=schemas, config=config
+    #     )
+    # TODO: support of allOf with Enums.
     if data.enum:
         return build_enum_property(
             data=data,
@@ -532,10 +532,6 @@ def _property_from_data(
             parent_name=parent_name,
             config=config,
         )
-    # if not inline:
-    #     data = deepcopy(data)
-    #     data.properties = None
-
     if data.anyOf or data.oneOf:
         return build_union_property(
             data=data, name=name, required=required, schemas=schemas, parent_name=parent_name, config=config
@@ -605,7 +601,6 @@ def property_from_data(
     schemas: Schemas,
     parent_name: str,
     config: Config,
-    # inline: bool = True
 ) -> Tuple[Union[Property, PropertyError], Schemas]:
     """
     Build a Property from an OpenAPI schema or reference. This Property represents a single input or output for a
@@ -637,7 +632,7 @@ def property_from_data(
             data=data,
             schemas=schemas,
             parent_name=parent_name,
-            config=config,  # , inline=inline
+            config=config,
         )
     except ValidationError:
         return PropertyError(detail="Failed to validate default value", data=data), schemas
