@@ -1,21 +1,48 @@
 import json
-from io import BytesIO
-from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, TypeVar
 
 import attr
 
-from ..models.body_upload_file_tests_upload_post_additional_property import (
-    BodyUploadFileTestsUploadPostAdditionalProperty,
-)
-from ..models.body_upload_file_tests_upload_post_some_nullable_object import (
-    BodyUploadFileTestsUploadPostSomeNullableObject,
-)
-from ..models.body_upload_file_tests_upload_post_some_object import BodyUploadFileTestsUploadPostSomeObject
-from ..models.body_upload_file_tests_upload_post_some_optional_object import (
-    BodyUploadFileTestsUploadPostSomeOptionalObject,
-)
+from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.body_upload_file_tests_upload_post_additional_property import (
+        BodyUploadFileTestsUploadPostAdditionalProperty,
+    )
+else:
+    BodyUploadFileTestsUploadPostAdditionalProperty = "BodyUploadFileTestsUploadPostAdditionalProperty"
+
+from io import BytesIO
+from typing import List, cast
+
 from ..models.different_enum import DifferentEnum
-from ..types import UNSET, File, FileJsonType, Unset
+
+if TYPE_CHECKING:
+    from ..models.body_upload_file_tests_upload_post_some_object import BodyUploadFileTestsUploadPostSomeObject
+else:
+    BodyUploadFileTestsUploadPostSomeObject = "BodyUploadFileTestsUploadPostSomeObject"
+
+from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.body_upload_file_tests_upload_post_some_optional_object import (
+        BodyUploadFileTestsUploadPostSomeOptionalObject,
+    )
+else:
+    BodyUploadFileTestsUploadPostSomeOptionalObject = "BodyUploadFileTestsUploadPostSomeOptionalObject"
+
+from typing import Dict
+
+from ..types import File, FileJsonType
+
+if TYPE_CHECKING:
+    from ..models.body_upload_file_tests_upload_post_some_nullable_object import (
+        BodyUploadFileTestsUploadPostSomeNullableObject,
+    )
+else:
+    BodyUploadFileTestsUploadPostSomeNullableObject = "BodyUploadFileTestsUploadPostSomeNullableObject"
+
+from typing import Union
 
 T = TypeVar("T", bound="BodyUploadFileTestsUploadPost")
 

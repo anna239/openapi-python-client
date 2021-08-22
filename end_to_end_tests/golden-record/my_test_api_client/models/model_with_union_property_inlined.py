@@ -1,10 +1,21 @@
-from typing import Any, Dict, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar, Union
 
 import attr
 
-from ..models.model_with_union_property_inlined_fruit_type_0 import ModelWithUnionPropertyInlinedFruitType0
-from ..models.model_with_union_property_inlined_fruit_type_1 import ModelWithUnionPropertyInlinedFruitType1
 from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.model_with_union_property_inlined_fruit_type_1 import ModelWithUnionPropertyInlinedFruitType1
+else:
+    ModelWithUnionPropertyInlinedFruitType1 = "ModelWithUnionPropertyInlinedFruitType1"
+
+from typing import Dict
+
+if TYPE_CHECKING:
+    from ..models.model_with_union_property_inlined_fruit_type_0 import ModelWithUnionPropertyInlinedFruitType0
+else:
+    ModelWithUnionPropertyInlinedFruitType0 = "ModelWithUnionPropertyInlinedFruitType0"
+
 
 T = TypeVar("T", bound="ModelWithUnionPropertyInlined")
 

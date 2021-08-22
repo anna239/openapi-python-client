@@ -1,11 +1,20 @@
-from typing import Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 import httpx
 
 from ...client import Client
-from ...models.test_inline_objects_json_body import TestInlineObjectsJsonBody
-from ...models.test_inline_objects_response_200 import TestInlineObjectsResponse200
 from ...types import Response
+
+if TYPE_CHECKING:
+    from ...models.test_inline_objects_response_200 import TestInlineObjectsResponse200
+else:
+    TestInlineObjectsResponse200 = "TestInlineObjectsResponse200"
+
+
+if TYPE_CHECKING:
+    from ...models.test_inline_objects_json_body import TestInlineObjectsJsonBody
+else:
+    TestInlineObjectsJsonBody = "TestInlineObjectsJsonBody"
 
 
 def _get_kwargs(

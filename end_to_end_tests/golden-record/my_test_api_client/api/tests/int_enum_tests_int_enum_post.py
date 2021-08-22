@@ -1,11 +1,15 @@
-from typing import Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 import httpx
 
 from ...client import Client
 from ...models.an_int_enum import AnIntEnum
-from ...models.http_validation_error import HTTPValidationError
 from ...types import UNSET, Response
+
+if TYPE_CHECKING:
+    from ...models.http_validation_error import HTTPValidationError
+else:
+    HTTPValidationError = "HTTPValidationError"
 
 
 def _get_kwargs(

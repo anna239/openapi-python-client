@@ -1,13 +1,25 @@
 import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import httpx
 
 from ...client import Client
-from ...models.a_model import AModel
-from ...models.an_enum import AnEnum
-from ...models.http_validation_error import HTTPValidationError
 from ...types import UNSET, Response
+
+if TYPE_CHECKING:
+    from ...models.a_model import AModel
+else:
+    AModel = "AModel"
+
+
+if TYPE_CHECKING:
+    from ...models.http_validation_error import HTTPValidationError
+else:
+    HTTPValidationError = "HTTPValidationError"
+
+from typing import Dict
+
+from ...models.an_enum import AnEnum
 
 
 def _get_kwargs(

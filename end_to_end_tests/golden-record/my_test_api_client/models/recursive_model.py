@@ -5,51 +5,50 @@ import attr
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.model_name import ModelName
+    from ..models.recursive_model import RecursiveModel
 else:
-    ModelName = "ModelName"
+    RecursiveModel = "RecursiveModel"
 
-from typing import Dict
 
-T = TypeVar("T", bound="ModelWithPropertyRef")
+T = TypeVar("T", bound="RecursiveModel")
 
 
 @attr.s(auto_attribs=True)
-class ModelWithPropertyRef:
+class RecursiveModel:
     """ """
 
-    inner: Union[Unset, ModelName] = UNSET
+    recursive_model: Union[Unset, T] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        inner: Union[Unset, Dict[str, Any]] = UNSET
-        if not isinstance(self.inner, Unset):
-            inner = self.inner.to_dict()
+        recursive_model: Union[Unset, Dict[str, Any]] = UNSET
+        if not isinstance(self.recursive_model, Unset):
+            recursive_model = self.recursive_model.to_dict()
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
-        if inner is not UNSET:
-            field_dict["inner"] = inner
+        if recursive_model is not UNSET:
+            field_dict["recursive_model"] = recursive_model
 
         return field_dict
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        _inner = d.pop("inner", UNSET)
-        inner: Union[Unset, ModelName]
-        if isinstance(_inner, Unset):
-            inner = UNSET
+        _recursive_model = d.pop("recursive_model", UNSET)
+        recursive_model: Union[Unset, RecursiveModel]
+        if isinstance(_recursive_model, Unset):
+            recursive_model = UNSET
         else:
-            inner = ModelName.from_dict(_inner)
+            recursive_model = RecursiveModel.from_dict(_recursive_model)
 
-        model_with_property_ref = cls(
-            inner=inner,
+        recursive_model = cls(
+            recursive_model=recursive_model,
         )
 
-        model_with_property_ref.additional_properties = d
-        return model_with_property_ref
+        recursive_model.additional_properties = d
+        return recursive_model
 
     @property
     def additional_keys(self) -> List[str]:

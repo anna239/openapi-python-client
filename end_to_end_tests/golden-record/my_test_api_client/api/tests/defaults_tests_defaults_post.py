@@ -1,14 +1,27 @@
 import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import httpx
-from dateutil.parser import isoparse
 
 from ...client import Client
-from ...models.an_enum import AnEnum
-from ...models.http_validation_error import HTTPValidationError
-from ...models.model_with_union_property import ModelWithUnionProperty
 from ...types import UNSET, Response, Unset
+
+if TYPE_CHECKING:
+    from ...models.model_with_union_property import ModelWithUnionProperty
+else:
+    ModelWithUnionProperty = "ModelWithUnionProperty"
+
+
+if TYPE_CHECKING:
+    from ...models.http_validation_error import HTTPValidationError
+else:
+    HTTPValidationError = "HTTPValidationError"
+
+from typing import Union
+
+from dateutil.parser import isoparse
+
+from ...models.an_enum import AnEnum
 
 
 def _get_kwargs(

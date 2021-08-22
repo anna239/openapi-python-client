@@ -16,6 +16,8 @@ from .body_upload_file_tests_upload_post_additional_property import BodyUploadFi
 from .body_upload_file_tests_upload_post_some_nullable_object import BodyUploadFileTestsUploadPostSomeNullableObject
 from .body_upload_file_tests_upload_post_some_object import BodyUploadFileTestsUploadPostSomeObject
 from .body_upload_file_tests_upload_post_some_optional_object import BodyUploadFileTestsUploadPostSomeOptionalObject
+from .circular_model_1 import CircularModel1
+from .circular_model_2 import CircularModel2
 from .different_enum import DifferentEnum
 from .free_form_model import FreeFormModel
 from .http_validation_error import HTTPValidationError
@@ -37,6 +39,7 @@ from .model_with_union_property_inlined import ModelWithUnionPropertyInlined
 from .model_with_union_property_inlined_fruit_type_0 import ModelWithUnionPropertyInlinedFruitType0
 from .model_with_union_property_inlined_fruit_type_1 import ModelWithUnionPropertyInlinedFruitType1
 from .none import None_
+from .recursive_model import RecursiveModel
 from .test_inline_objects_json_body import TestInlineObjectsJsonBody
 from .test_inline_objects_response_200 import TestInlineObjectsResponse200
 from .validation_error import ValidationError

@@ -1,11 +1,23 @@
-from typing import Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 import httpx
 
 from ...client import Client
-from ...models.body_upload_file_tests_upload_post import BodyUploadFileTestsUploadPost
-from ...models.http_validation_error import HTTPValidationError
 from ...types import UNSET, Response, Unset
+
+if TYPE_CHECKING:
+    from ...models.body_upload_file_tests_upload_post import BodyUploadFileTestsUploadPost
+else:
+    BodyUploadFileTestsUploadPost = "BodyUploadFileTestsUploadPost"
+
+from typing import Union
+
+if TYPE_CHECKING:
+    from ...models.http_validation_error import HTTPValidationError
+else:
+    HTTPValidationError = "HTTPValidationError"
+
+from typing import Dict
 
 
 def _get_kwargs(
