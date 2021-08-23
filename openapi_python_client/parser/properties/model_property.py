@@ -22,6 +22,7 @@ class ModelProperty(Property):
     description: str
     relative_imports: Set[str]
     additional_properties: Union[bool, Property]
+    base_classes: List[Property]
     _json_type_string: ClassVar[str] = "Dict[str, Any]"
 
     template: ClassVar[str] = "model_property.py.jinja"
@@ -114,6 +115,7 @@ class _PropertyData(NamedTuple):
     required_props: List[Property]
     relative_imports: Set[str]
     schemas: Schemas
+    base_classes: List[Property]
 
 
 # pylint: disable=too-many-locals,too-many-branches
@@ -125,6 +127,7 @@ def _process_properties(
     properties: Dict[str, Property] = {}
     relative_imports: Set[str] = set()
     required_set = set(data.required or [])
+    base_classes: List[Property] = []
 
     def _add_if_no_conflict(new_prop: Property) -> Optional[PropertyError]:
         nonlocal properties
@@ -141,6 +144,7 @@ def _process_properties(
 
     unprocessed_props = data.properties or {}
     for sub_prop in data.allOf or []:
+        sub_model: Optional[Property] = None
         if isinstance(sub_prop, oai.Reference):
             ref_path = parse_reference_path(sub_prop.ref)
             if isinstance(ref_path, ParseError):
@@ -148,15 +152,23 @@ def _process_properties(
             sub_model = schemas.classes_by_reference.get(ref_path)
             if sub_model is None:
                 return PropertyError(f"Reference {sub_prop.ref} not found")
-            if not isinstance(sub_model, ModelProperty):
-                return PropertyError("Cannot take allOf a non-object")
-            for prop in chain(sub_model.required_properties, sub_model.optional_properties):
-                err = _add_if_no_conflict(prop)
-                if err is not None:
-                    return err
-        else:
-            unprocessed_props.update(sub_prop.properties or {})
-            required_set.update(sub_prop.required or [])
+        #     if not isinstance(sub_model, ModelProperty):
+        #         return PropertyError("Cannot take allOf a non-object")
+        #     for prop in chain(sub_model.required_properties, sub_model.optional_properties):
+        #         err = _add_if_no_conflict(prop)
+        #         if err is not None:
+        #             return err
+        # else:
+        #     unprocessed_props.update(sub_prop.properties or {})
+        #     required_set.update(sub_prop.required or [])
+        # else:
+        #     sub_model = property_from_data(
+        #         name='', required=True, data=sub_prop, schemas=schemas, parent_name=class_name, config=config
+        #     )
+        #     if isinstance(sub_model, PropertyError):
+        #         return PropertyError(f"Base class inline creation error.")
+        # TODO: add inline model building.
+        base_classes.append(sub_model)
 
     for key, value in unprocessed_props.items():
         prop_required = key in required_set
@@ -178,7 +190,7 @@ def _process_properties(
             optional_properties.append(prop)
         relative_imports.update(prop.get_imports(prefix=".."))
 
-    # Except self import
+    # Except self import # FIXME
     relative_imports = {import_ for import_ in relative_imports if not import_.endswith("import " + class_name)}
 
     return _PropertyData(
@@ -186,6 +198,7 @@ def _process_properties(
         required_props=required_properties,
         relative_imports=relative_imports,
         schemas=schemas,
+        base_classes=base_classes,
     )
 
 
@@ -264,6 +277,7 @@ def build_model_property(
         name=name,
         additional_properties=additional_properties,
         python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
+        base_classes=property_data.base_classes,
     )
     # if class_info.name in schemas.classes_by_name:
     #     error = PropertyError(data=data, detail=f'Attempted to generate duplicate models with name "{class_info.name}"')

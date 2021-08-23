@@ -17,6 +17,10 @@ from ..types import UNSET, Unset
 {{ relative }}
 {% endfor %}
 
+{% for base_class in models.base_classes %}
+{{ base_class.get_imports()}}
+{% endfor %}
+
 
 {% if model.additional_properties %}
 {% set additional_property_type = 'Any' if model.additional_properties == True else model.additional_properties.get_type_string() %}
@@ -27,8 +31,12 @@ from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="{{ class_name }}")
 
+# FIXME!
+{% set base_class_names = (cls.class_info.name for cls in model.base_classes) %}
+{% set base_classes = "(" + " ".join(base_class_names) + ")" if base_class_names else "" %}
+
 @attr.s(auto_attribs=True)
-class {{ class_name }}:
+class {{ class_name }}{{ base_classes }}:
     """ {{ model.description }} """
     {% for property in model.required_properties + model.optional_properties %}
     {% if property.default is none and property.required %}
