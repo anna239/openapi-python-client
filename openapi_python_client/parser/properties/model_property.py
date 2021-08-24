@@ -1,5 +1,5 @@
 from itertools import chain
-from typing import ClassVar, Dict, List, NamedTuple, Optional, Set, Tuple, Union
+from typing import ClassVar, Dict, List, NamedTuple, Optional, Set, Tuple, Union, Iterator
 
 import attr
 
@@ -54,6 +54,11 @@ else:
             }
         )
         return imports
+
+    def get_base_classes_string(self) -> str:
+        """TODO"""
+        base_names: Iterator[str] = (class_.class_info.name for class_ in self.base_classes)
+        return "(" + ", ".join(base_names) + ")" if base_names else ""
 
 
 def _values_are_subset(first: EnumProperty, second: EnumProperty) -> bool:

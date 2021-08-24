@@ -17,8 +17,10 @@ from ..types import UNSET, Unset
 {{ relative }}
 {% endfor %}
 
-{% for base_class in models.base_classes %}
-{{ base_class.get_imports()}}
+{% for base_class in model.base_classes %}
+{% for import_ in base_class.get_imports(prefix="..") %}
+{{ import_ }}
+{% endfor %}
 {% endfor %}
 
 
@@ -31,12 +33,9 @@ from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="{{ class_name }}")
 
-# FIXME!
-{% set base_class_names = (cls.class_info.name for cls in model.base_classes) %}
-{% set base_classes = "(" + " ".join(base_class_names) + ")" if base_class_names else "" %}
 
 @attr.s(auto_attribs=True)
-class {{ class_name }}{{ base_classes }}:
+class {{ class_name }}{{ model.get_base_classes_string() }}:
     """ {{ model.description }} """
     {% for property in model.required_properties + model.optional_properties %}
     {% if property.default is none and property.required %}
@@ -65,6 +64,10 @@ class {{ class_name }}{{ base_classes }}:
 {% endfor %}
 
 field_dict: Dict[str, Any] = {}
+{% for base_class in model.base_classes %}
+_{{ base_class.class_info.name }}_dict = super({{ base_class.class_info.name }}, self).to_dict()
+field_dict.update(_{{ base_class.class_info.name }}_dict)
+{% endfor %}
 {% if model.additional_properties %}
 {% if model.additional_properties.template %}
 {% from "property_templates/" + model.additional_properties.template import transform %}
