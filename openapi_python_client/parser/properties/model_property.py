@@ -1,5 +1,4 @@
-from itertools import chain
-from typing import ClassVar, Dict, List, NamedTuple, Optional, Set, Tuple, Union, Iterator
+from typing import ClassVar, Dict, Iterator, List, NamedTuple, Optional, Set, Tuple, Union
 
 import attr
 
@@ -32,26 +31,31 @@ class ModelProperty(Property):
     def get_base_type_string(self) -> str:
         return self.class_info.name
 
-    def get_imports(self, *, prefix: str) -> Set[str]:
+    def get_imports(self, *, prefix: str, runtime: bool = False) -> Set[str]:
         """
         Get a set of import strings that should be included when this property is used somewhere
 
         Args:
             prefix: A prefix to put before any relative (local) module names. This should be the number of . to get
-            back to the root of the generated client.
+                back to the root of the generated client.
+            runtime: todo
         """
+        if runtime:
+            model_import = f"from {prefix}models.{self.class_info.module_name} import {self.class_info.name}"
+        else:
+            model_import = f"""
+if TYPE_CHECKING:
+    from {prefix}models.{self.class_info.module_name} import {self.class_info.name}
+else:
+    {self.class_info.name} = '{self.class_info.name}'
+                           """
+
         imports = super().get_imports(prefix=prefix)
         imports.update(
             {
                 "from typing import Dict",
                 "from typing import cast",
-                f"from {prefix}models.{self.class_info.module_name} import {self.class_info.name}"
-#                 f"""
-# if TYPE_CHECKING:
-#     from {prefix}models.{self.class_info.module_name} import {self.class_info.name}
-# else:
-#     {self.class_info.name} = '{self.class_info.name}'
-#                 """,
+                model_import,
             }
         )
         return imports
@@ -158,8 +162,8 @@ def _process_properties(
             sub_model = schemas.classes_by_reference.get(ref_path)
             if sub_model is None:
                 return PropertyError(f"Reference {sub_prop.ref} not found")
-        #     if not isinstance(sub_model, ModelProperty):
-        #         return PropertyError("Cannot take allOf a non-object")
+            if not isinstance(sub_model, ModelProperty):
+                return PropertyError("Cannot take allOf a non-object")
         #     for prop in chain(sub_model.required_properties, sub_model.optional_properties):
         #         err = _add_if_no_conflict(prop)
         #         if err is not None:
@@ -194,10 +198,11 @@ def _process_properties(
             required_properties.append(prop)
         else:
             optional_properties.append(prop)
+        # todo: except circular imports
         relative_imports.update(prop.get_imports(prefix=".."))
 
-    # Except self import # FIXME
-    relative_imports = {import_ for import_ in relative_imports if not import_.endswith("import " + class_name)}
+    # Except self import
+    # relative_imports = {import_ for import_ in relative_imports if not import_.endswith("import " + class_name)}
 
     return _PropertyData(
         optional_props=optional_properties,
