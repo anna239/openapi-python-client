@@ -1,5 +1,8 @@
 from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar, Tuple, Optional, BinaryIO, TextIO
 
+{% set class_name = model.class_info.name %}
+{% set module_name = model.class_info.module_name %}
+
 {% if model.additional_properties %}
 from typing import List
 
@@ -14,7 +17,9 @@ from ..types import UNSET, Unset
 
 
 {% for relative in model.relative_imports %}
+{% if not relative.endswith("import " + class_name) %}
 {{ relative }}
+{% endif %}
 {% endfor %}
 
 {% for base_class in model.base_classes %}
@@ -27,9 +32,6 @@ from ..types import UNSET, Unset
 {% if model.additional_properties %}
 {% set additional_property_type = 'Any' if model.additional_properties == True else model.additional_properties.get_type_string() %}
 {% endif %}
-
-{% set class_name = model.class_info.name %}
-{% set module_name = model.class_info.module_name %}
 
 T = TypeVar("T", bound="{{ class_name }}")
 
@@ -65,7 +67,7 @@ class {{ class_name }}{{ model.get_base_classes_string() }}:
 
 field_dict: Dict[str, Any] = {}
 {% for base_class in model.base_classes %}
-_{{ base_class.class_info.name }}_dict = super({{ base_class.class_info.name }}, self).to_dict()
+_{{ base_class.class_info.name }}_dict = super({{ base_class.class_info.name }}).to_dict()
 field_dict.update(_{{ base_class.class_info.name }}_dict)
 {% endfor %}
 {% if model.additional_properties %}
