@@ -695,6 +695,11 @@ def build_schemas(
             still_making_progress2 = True
         all_of = next_round
 
+    # fixme
+    # for name, model in schemas.classes_by_name.items():
+    #     if isinstance(model, ModelProperty) and name == 'CustomFieldActivityItem':  # [b for b in model.base_classes if isinstance(b, tuple)]:
+    #         print(name, model.base_classes)
+
     schemas.errors.extend(errors)
     return schemas
 

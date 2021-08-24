@@ -153,8 +153,8 @@ def _process_properties(
         return None
 
     unprocessed_props = data.properties or {}
-    for sub_prop in data.allOf or []:
-        sub_model: Optional[Property] = None
+    for i, sub_prop in enumerate(data.allOf or []):
+        # sub_model: Optional[Property] = None
         if isinstance(sub_prop, oai.Reference):
             ref_path = parse_reference_path(sub_prop.ref)
             if isinstance(ref_path, ParseError):
@@ -164,21 +164,25 @@ def _process_properties(
                 return PropertyError(f"Reference {sub_prop.ref} not found")
             if not isinstance(sub_model, ModelProperty):
                 return PropertyError("Cannot take allOf a non-object")
+            base_classes.append(sub_model)
         #     for prop in chain(sub_model.required_properties, sub_model.optional_properties):
         #         err = _add_if_no_conflict(prop)
         #         if err is not None:
         #             return err
+        else:
+            unprocessed_props.update(sub_prop.properties or {})
+            required_set.update(sub_prop.required or [])
         # else:
-        #     unprocessed_props.update(sub_prop.properties or {})
-        #     required_set.update(sub_prop.required or [])
-        # else:
-        #     sub_model = property_from_data(
-        #         name='', required=True, data=sub_prop, schemas=schemas, parent_name=class_name, config=config
+        #     sub_model, schema = property_from_data(
+        #         name=f'inline_sub_{i}', required=True, data=sub_prop, schemas=schemas, parent_name=class_name, config=config
         #     )
         #     if isinstance(sub_model, PropertyError):
         #         return PropertyError(f"Base class inline creation error.")
-        # TODO: add inline model building.
-        base_classes.append(sub_model)
+        #     # fixme: looks like update_schema_with_data
+        #     schemas = attr.evolve(schemas, classes_by_reference={
+        #         **schemas.classes_by_reference,
+        #     })
+
 
     for key, value in unprocessed_props.items():
         prop_required = key in required_set
@@ -198,11 +202,7 @@ def _process_properties(
             required_properties.append(prop)
         else:
             optional_properties.append(prop)
-        # todo: except circular imports
         relative_imports.update(prop.get_imports(prefix=".."))
-
-    # Except self import
-    # relative_imports = {import_ for import_ in relative_imports if not import_.endswith("import " + class_name)}
 
     return _PropertyData(
         optional_props=optional_properties,
