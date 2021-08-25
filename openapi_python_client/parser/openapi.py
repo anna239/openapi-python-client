@@ -241,7 +241,10 @@ class Endpoint:
                     )
                 )
                 continue
-            endpoint.relative_imports |= response.prop.get_imports(prefix="...")
+            if isinstance(response.prop, ModelProperty):
+                endpoint.relative_imports |= response.prop.get_imports(prefix="...", runtime=True)
+            else:
+                endpoint.relative_imports |= response.prop.get_imports(prefix="...")
             endpoint.responses.append(response)
         return endpoint, schemas
 
@@ -343,8 +346,10 @@ class Endpoint:
             if param.param_in == oai.ParameterLocation.QUERY and (prop.nullable or not prop.required):
                 # There is no NULL for query params, so nullable and not required are the same.
                 prop = attr.evolve(prop, required=False, nullable=True)
-
-            endpoint.relative_imports.update(prop.get_imports(prefix="..."))
+            if isinstance(prop, ModelProperty):
+                endpoint.relative_imports.update(prop.get_imports(prefix="...", runtime=True))
+            else:
+                endpoint.relative_imports.update(prop.get_imports(prefix="..."))
             endpoint.used_python_identifiers.add(prop.python_name)
             parameters_by_location[param.param_in][prop.name] = prop
 
