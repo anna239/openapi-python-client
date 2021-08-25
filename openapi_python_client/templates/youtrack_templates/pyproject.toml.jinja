@@ -1,0 +1,33 @@
++[tool.poetry]
+name = "{{ project_name }}"
+version = "{{ package_version }}"
+description = "{{ package_description }}"
+
+authors = ["Matvey Ovtsin <matvey.ovtsin@jetbrains.com>"]
+
+readme = "README.md"
+packages = [
+    {include = "{{ package_name }}"},
+]
+include = ["CHANGELOG.md", "{{ package_name }}/py.typed"]
+
+
+[tool.poetry.dependencies]
+python = "^3.6"
+httpx = ">=0.15.4,<0.19.0"
+attrs = ">=20.1.0,<22.0.0"
+python-dateutil = "^2.8.0"
+hub-rest-client = ">=0.1.1"
+
+[tool.black]
+line-length = 120
+target_version = ['py36', 'py37', 'py38']
+exclude = '''
+(
+  /(
+    | \.git
+    | \.venv
+    | \.mypy_cache
+  )/
+)
+'''
