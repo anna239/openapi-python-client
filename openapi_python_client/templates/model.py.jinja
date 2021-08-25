@@ -1,4 +1,6 @@
-from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar, Tuple, Optional, BinaryIO, TextIO
+from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar, Tuple, Optional, Union, cast, BinaryIO, TextIO
+
+
 
 {% set class_name = model.class_info.name %}
 {% set module_name = model.class_info.module_name %}
@@ -15,12 +17,20 @@ import json
 
 from ..types import UNSET, Unset
 
-
+{% if model.relative_imports %}
+if TYPE_CHECKING:
 {% for relative in model.relative_imports %}
-{% if not relative.endswith("import " + class_name) %}
-{{ relative }}
-{% endif %}
+    {% if not relative.endswith("import " + class_name) %}
+    {{ relative }}
+    {% endif %}
 {% endfor %}
+else:
+{% for relative in model.relative_imports %}
+    {% if not relative.endswith("import " + class_name) %}
+    {{ relative.split()[-1] }} = "{{ relative.split()[-1] }}"
+    {% endif %}
+{% endfor %}
+{% endif %}
 
 {% for base_class in model.base_classes %}
 {% for import_ in base_class.get_imports(prefix="..", runtime=True) %}
@@ -41,12 +51,12 @@ class {{ class_name }}{{ model.get_base_classes_string() }}:
     """ {{ model.description }} """
     {% for property in model.required_properties + model.optional_properties %}
     {% if property.default is none and property.required %}
-    {{ property.to_string().replace(" " + class_name + "]", " T]") }}
+    {{ property.to_string().replace(" " + class_name + "]", " T]").replace("[" + class_name + "]]", "[T]]") }}
     {% endif %}
     {% endfor %}
     {% for property in model.required_properties + model.optional_properties %}
     {% if property.default is not none or not property.required %}
-    {{ property.to_string().replace(" " + class_name + "]", " T]") }}
+    {{ property.to_string().replace(" " + class_name + "]", " T]").replace("[" + class_name + "]]", "[T]]") }}
     {% endif %}
     {% endfor %}
     {% if model.additional_properties %}

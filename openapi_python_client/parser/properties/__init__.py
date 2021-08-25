@@ -165,7 +165,7 @@ class ListProperty(Property, Generic[InnerProp]):
         """
         imports = super().get_imports(prefix=prefix)
         imports.update(self.inner_property.get_imports(prefix=prefix))
-        imports.add("from typing import cast, List")
+        # imports.add("from typing import cast, List")
         return imports
 
 

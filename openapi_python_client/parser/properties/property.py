@@ -87,11 +87,11 @@ class Property:
             back to the root of the generated client.
         """
         imports = set()
-        if self.nullable:
-            imports.add("from typing import Optional")
-        if not self.required:
-            imports.add("from typing import Union")
-            imports.add(f"from {prefix}types import UNSET, Unset")
+        # if self.nullable:
+        #     imports.add("from typing import Optional")
+        # if not self.required:
+        #     imports.add("from typing import Union")
+        #     imports.add(f"from {prefix}types import UNSET, Unset")
         return imports
 
     def to_string(self) -> str:
