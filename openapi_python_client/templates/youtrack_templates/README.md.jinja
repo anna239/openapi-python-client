@@ -1,7 +1,7 @@
-# {{ project_name }} `{{ package_version }}`
++# {{ project_name }} `{{ package_version }}`
 {{ package_description }}
 
-⚠️This SDK generated using `{{ openapi_version }}` [OpenAPI](https://hub.jetbrains.com/api/rest/openapi.json) version by custom [openapi-python-client](https://github.com/openapi-generators/openapi-python-client) which is under development.
+⚠️This SDK generated using `{{ openapi_version }}` [OpenAPI](https://youtrack.jetbrains.com/api/openapi.json) version by custom [openapi-python-client](https://github.com/openapi-generators/openapi-python-client) which is under development.
  It may have some bugs. Use with caution.⚠️
 
 If you find a bug or want to request a new feature, please create an issue in [YouTrack](https://youtrack.jetbrains.com/newIssue?project=JT&c=State%20Open&c=Subsystem%20Python%20client%20library).
@@ -12,18 +12,22 @@ First, create a client:
 ```python
 from {{ package_name }} import Client
 
-client = Client(hub_base_url="https://hub.jetbrains.com/api/rest")
+client = Client(
+    hub_base_url="https://hub.jetbrains.com/api/rest",
+    youtrack_base_url="https://youtrack.jetbrains.com/api"
+)
 ```
 
 If the endpoints you're going to hit require authentication, use `AuthenticatedClient` instead:
 
 ```python
-import os
-
 from {{ package_name }} import AuthenticatedClient
 
-
-client = AuthenticatedClient(hub_base_url="https://hub.jetbrains.com/api/rest", token=os.getenv("HUB_TOKEN"))
+client = AuthenticatedClient(
+    hub_base_url="https://hub.jetbrains.com/api/rest",
+    youtrack_base_url="https://youtrack.jetbrains.com/api",
+    token=os.getenv("YOUTRACK_TOKEN")
+)
 ```
 
 Now call your endpoint and use your models:
