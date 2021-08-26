@@ -30,33 +30,39 @@ class ModelProperty(Property):
     is_multipart_body: bool = False
 
     def get_base_type_string(self) -> str:
-        return f"{self.class_info.module_name}.{self.class_info.name}"
+        return f"{self.class_info.module_name}_m.{self.class_info.name}"
 
     def get_model_import(self, *, prefix: str) -> str:
         # return f"from {prefix}models.{self.class_info.module_name} import {self.class_info.name}"
-        return f"from {prefix}models import {self.class_info.module_name}"
+        return f"from {prefix}models import {self.class_info.module_name} as {self.class_info.module_name}_m"
 
-    def get_imports(self, *, prefix: str, runtime: bool = False) -> Set[str]:
+    def get_imports(self, *, prefix: str) -> Set[str]:
         """
         Get a set of import strings that should be included when this property is used somewhere
 
         Args:
             prefix: A prefix to put before any relative (local) module names. This should be the number of . to get
                 back to the root of the generated client.
-            runtime: todo
         """
         model_import = self.get_model_import(prefix=prefix)
         imports = super().get_imports(prefix=prefix)
-        imports.update({model_import,})
+        imports.update({model_import, })
         return imports
 
     def get_base_classes_string(self) -> str:
         """TODO"""
         base_names: Iterator[str] = (
-            f"{class_.class_info.module_name}.{class_.class_info.name}"
-            for class_ in self.base_classes
+            f"{base_class.class_info.module_name}.{base_class.class_info.name}"
+            for base_class in self.base_classes
         )
         return "(" + ", ".join(base_names) + ")" if base_names else ""
+
+    def get_base_classes_imports(self, *, prefix: str) -> Set[str]:
+        # return f"from {prefix}models.{self.class_info.module_name} import {self.class_info.name}"
+        return {
+            f"from {prefix}models import {base_class.class_info.module_name}"
+            for base_class in self.base_classes
+        }
 
 
 def _values_are_subset(first: EnumProperty, second: EnumProperty) -> bool:
@@ -197,8 +203,8 @@ def _process_properties(
             optional_properties.append(prop)
         relative_imports.update(prop.get_imports(prefix=".."))
 
-    for base_class in base_classes:
-        relative_imports.update(base_class.get_imports(prefix=".."))
+    # for base_class in base_classes:
+    #     relative_imports.update(base_class.get_imports(prefix=".."))
 
     return _PropertyData(
         optional_props=optional_properties,

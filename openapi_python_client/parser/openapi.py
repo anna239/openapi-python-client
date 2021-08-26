@@ -241,10 +241,7 @@ class Endpoint:
                     )
                 )
                 continue
-            if isinstance(response.prop, ModelProperty):
-                endpoint.relative_imports |= response.prop.get_imports(prefix="...", runtime=True)
-            else:
-                endpoint.relative_imports |= response.prop.get_imports(prefix="...")
+            endpoint.relative_imports |= response.prop.get_imports(prefix="...")
             endpoint.responses.append(response)
         return endpoint, schemas
 
