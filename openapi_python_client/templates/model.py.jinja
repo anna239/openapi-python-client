@@ -18,25 +18,16 @@ import json
 from ..types import UNSET, Unset
 
 {% if model.relative_imports %}
-if TYPE_CHECKING:
+try:
 {% for relative in model.relative_imports %}
-    {% if not relative.endswith("import " + class_name) %}
     {{ relative }}
-    {% endif %}
 {% endfor %}
-else:
+except ImportError:
+    import sys
 {% for relative in model.relative_imports %}
-    {% if not relative.endswith("import " + class_name) %}
-    {{ relative.split()[-1] }} = "{{ relative.split()[-1] }}"
-    {% endif %}
+    {{ relative.split()[-1].split(".")[0] }} = sys.modules[__package__ + "{{ relative.split()[-1].split(".")[0] }}"]
 {% endfor %}
 {% endif %}
-
-{% for base_class in model.base_classes %}
-{% for import_ in base_class.get_imports(prefix="..", runtime=True) %}
-{{ import_ }}
-{% endfor %}
-{% endfor %}
 
 
 {% if model.additional_properties %}
@@ -77,7 +68,7 @@ class {{ class_name }}{{ model.get_base_classes_string() }}:
 
 field_dict: Dict[str, Any] = {}
 {% for base_class in model.base_classes %}
-_{{ base_class.class_info.name }}_dict = super({{ base_class.class_info.name }}).to_dict()
+_{{ base_class.class_info.name }}_dict = super().to_dict()
 field_dict.update(_{{ base_class.class_info.name }}_dict)
 {% endfor %}
 {% if model.additional_properties %}
@@ -124,7 +115,7 @@ return field_dict
         d = src_dict.copy()
 
     {% for base_class in model.base_classes %}
-        _{{ base_class.class_info.name }}_kwargs = super({{ base_class.class_info.name }}).from_dict(src_dict=d).to_dict()
+        _{{ base_class.class_info.name }}_kwargs = super().from_dict(src_dict=d).to_dict()
     {% endfor %}
 
 {% for property in model.required_properties + model.optional_properties %}

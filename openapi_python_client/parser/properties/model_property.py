@@ -30,10 +30,11 @@ class ModelProperty(Property):
     is_multipart_body: bool = False
 
     def get_base_type_string(self) -> str:
-        return self.class_info.name
+        return f"{self.class_info.module_name}.{self.class_info.name}"
 
     def get_model_import(self, *, prefix: str) -> str:
-        return f"from {prefix}models.{self.class_info.module_name} import {self.class_info.name}"
+        # return f"from {prefix}models.{self.class_info.module_name} import {self.class_info.name}"
+        return f"from {prefix}models import {self.class_info.module_name}"
 
     def get_imports(self, *, prefix: str, runtime: bool = False) -> Set[str]:
         """
@@ -51,11 +52,11 @@ class ModelProperty(Property):
 
     def get_base_classes_string(self) -> str:
         """TODO"""
-        base_names: Iterator[str] = (class_.class_info.name for class_ in self.base_classes)
+        base_names: Iterator[str] = (
+            f"{class_.class_info.module_name}.{class_.class_info.name}"
+            for class_ in self.base_classes
+        )
         return "(" + ", ".join(base_names) + ")" if base_names else ""
-
-    # def get_base_class_imports(self) -> Set[str]:
-    #     return
 
 
 def _values_are_subset(first: EnumProperty, second: EnumProperty) -> bool:
@@ -195,6 +196,9 @@ def _process_properties(
         else:
             optional_properties.append(prop)
         relative_imports.update(prop.get_imports(prefix=".."))
+
+    for base_class in base_classes:
+        relative_imports.update(base_class.get_imports(prefix=".."))
 
     return _PropertyData(
         optional_props=optional_properties,
