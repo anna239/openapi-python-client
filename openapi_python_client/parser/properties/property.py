@@ -105,5 +105,5 @@ class Property:
             default = None
 
         if default is not None:
-            return f"{self.python_name}: {self.get_type_string()} = {default}"
-        return f"{self.python_name}: {self.get_type_string()}"
+            return f"{self.python_name}: '{self.get_type_string()}' = {default}"
+        return f"{self.python_name}: '{self.get_type_string()}'"

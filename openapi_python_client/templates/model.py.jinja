@@ -41,18 +41,6 @@ except ImportError:
 @attr.s(auto_attribs=True)
 class {{ class_name }}{{ model.get_base_classes_string() }}:
     """ {{ model.description }} """
-    {% if model.relative_imports %}
-    try:
-    {% for relative in model.relative_imports %}
-        {{ relative }}
-    {% endfor %}
-    except ImportError:
-        import sys
-    {% for relative in model.relative_imports %}
-        {{ relative.split()[-1].split(".")[0] }} = sys.modules[__package__ + "{{ relative.split()[-1].split(".")[0][:-2] }}"]
-    {% endfor %}
-    {% endif %}
-
 
     {% for property in model.required_properties + model.optional_properties %}
     {% if property.default is none and property.required %}
