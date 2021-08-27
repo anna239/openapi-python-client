@@ -21,7 +21,7 @@ class ModelProperty(Property):
     description: str
     relative_imports: Set[str]
     # type_checking_imports: Set[str]
-    additional_properties: Union[bool, Property]
+    # additional_properties: Union[bool, Property]
     base_classes: List[Property]
     _json_type_string: ClassVar[str] = "Dict[str, Any]"
 
@@ -215,34 +215,34 @@ def _process_properties(
     )
 
 
-def _get_additional_properties(
-    *,
-    schema_additional: Union[None, bool, oai.Reference, oai.Schema],
-    schemas: Schemas,
-    class_name: str,
-    config: Config,
-) -> Tuple[Union[bool, Property, PropertyError], Schemas]:
-    from . import property_from_data
-
-    if schema_additional is None:
-        return True, schemas
-
-    if isinstance(schema_additional, bool):
-        return schema_additional, schemas
-
-    if isinstance(schema_additional, oai.Schema) and not any(schema_additional.dict().values()):
-        # An empty schema
-        return True, schemas
-
-    additional_properties, schemas = property_from_data(
-        name="AdditionalProperty",
-        required=True,  # in the sense that if present in the dict will not be None
-        data=schema_additional,
-        schemas=schemas,
-        parent_name=class_name,
-        config=config,
-    )
-    return additional_properties, schemas
+# def _get_additional_properties(
+#     *,
+#     schema_additional: Union[None, bool, oai.Reference, oai.Schema],
+#     schemas: Schemas,
+#     class_name: str,
+#     config: Config,
+# ) -> Tuple[Union[bool, Property, PropertyError], Schemas]:
+#     from . import property_from_data
+#
+#     if schema_additional is None:
+#         return True, schemas
+#
+#     if isinstance(schema_additional, bool):
+#         return schema_additional, schemas
+#
+#     if isinstance(schema_additional, oai.Schema) and not any(schema_additional.dict().values()):
+#         # An empty schema
+#         return True, schemas
+#
+#     additional_properties, schemas = property_from_data(
+#         name="AdditionalProperty",
+#         required=True,  # in the sense that if present in the dict will not be None
+#         data=schema_additional,
+#         schemas=schemas,
+#         parent_name=class_name,
+#         config=config,
+#     )
+#     return additional_properties, schemas
 
 
 def build_model_property(
@@ -270,13 +270,13 @@ def build_model_property(
         return property_data, schemas
     schemas = property_data.schemas
 
-    additional_properties, schemas = _get_additional_properties(
-        schema_additional=data.additionalProperties, schemas=schemas, class_name=class_info.name, config=config
-    )
-    if isinstance(additional_properties, Property):
-        property_data.relative_imports.update(additional_properties.get_imports(prefix=".."))
-    elif isinstance(additional_properties, PropertyError):
-        return additional_properties, schemas
+    # additional_properties, schemas = _get_additional_properties(
+    #     schema_additional=data.additionalProperties, schemas=schemas, class_name=class_info.name, config=config
+    # )
+    # if isinstance(additional_properties, Property):
+    #     property_data.relative_imports.update(additional_properties.get_imports(prefix=".."))
+    # elif isinstance(additional_properties, PropertyError):
+    #     return additional_properties, schemas
 
     prop = ModelProperty(
         class_info=class_info,
@@ -288,7 +288,7 @@ def build_model_property(
         nullable=data.nullable,
         required=required,
         name=name,
-        additional_properties=additional_properties,
+        # additional_properties=additional_properties,
         python_name=utils.PythonIdentifier(value=name, prefix=config.field_prefix),
         base_classes=property_data.base_classes,
     )
