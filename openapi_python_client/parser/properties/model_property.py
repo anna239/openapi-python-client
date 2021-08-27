@@ -20,8 +20,7 @@ class ModelProperty(Property):
     optional_properties: List[Property]
     description: str
     relative_imports: Set[str]
-    # type_checking_imports: Set[str]
-    # additional_properties: Union[bool, Property]
+    # additional_properties: Union[bool, Property] # fixme: Seems like unused in our APIs.
     base_classes: List[Property]
     _json_type_string: ClassVar[str] = "Dict[str, Any]"
 
@@ -33,7 +32,7 @@ class ModelProperty(Property):
         return f"{self.class_info.module_name}_m.{self.class_info.name}"
 
     def get_model_import(self, *, prefix: str) -> str:
-        # return f"from {prefix}models.{self.class_info.module_name} import {self.class_info.name}"
+        """todo"""
         return f"from {prefix}models import {self.class_info.module_name} as {self.class_info.module_name}_m"
 
     def get_imports(self, *, prefix: str) -> Set[str]:
@@ -46,23 +45,23 @@ class ModelProperty(Property):
         """
         model_import = self.get_model_import(prefix=prefix)
         imports = super().get_imports(prefix=prefix)
-        imports.update({model_import, })
+        imports.update(
+            {
+                model_import,
+            }
+        )
         return imports
 
     def get_base_classes_string(self) -> str:
         """TODO"""
         base_names: Iterator[str] = (
-            f"{base_class.class_info.module_name}.{base_class.class_info.name}"
-            for base_class in self.base_classes
+            f"{base_class.class_info.module_name}.{base_class.class_info.name}" for base_class in self.base_classes
         )
         return "(" + ", ".join(base_names) + ")" if base_names else ""
 
     def get_base_classes_imports(self, *, prefix: str) -> Set[str]:
-        # return f"from {prefix}models.{self.class_info.module_name} import {self.class_info.name}"
-        return {
-            f"from {prefix}models import {base_class.class_info.module_name}"
-            for base_class in self.base_classes
-        }
+        """todo"""
+        return {f"from {prefix}models import {base_class.class_info.module_name}" for base_class in self.base_classes}
 
 
 def _values_are_subset(first: EnumProperty, second: EnumProperty) -> bool:
@@ -177,11 +176,11 @@ def _process_properties(
         #     )
         #     if isinstance(sub_model, PropertyError):
         #         return PropertyError(f"Base class inline creation error.")
-        #     # fixme: looks like update_schema_with_data
+        #     # fixme: looks like update_schema_with_data. But it incompatible now.
+        #           Better write new top loop without overlap.
         #     schemas = attr.evolve(schemas, classes_by_reference={
         #         **schemas.classes_by_reference,
         #     })
-
 
     for key, value in unprocessed_props.items():
         prop_required = key in required_set
@@ -215,6 +214,7 @@ def _process_properties(
     )
 
 
+# fixme: Seems unused in our APIs.
 # def _get_additional_properties(
 #     *,
 #     schema_additional: Union[None, bool, oai.Reference, oai.Schema],

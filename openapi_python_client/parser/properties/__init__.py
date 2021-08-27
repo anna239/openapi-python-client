@@ -641,7 +641,11 @@ def property_from_data(
 def build_schemas(
     *, components: Dict[str, Union[oai.Reference, oai.Schema]], schemas: Schemas, config: Config
 ) -> Schemas:
-    """Get a list of Schemas from an OpenAPI dict"""
+    """Get a list of Schemas from an OpenAPI dict
+
+    FIXME: This one OUTDATED and should be replaced with top loop with slightly different logic
+        So do not refactor this one.
+    """
     to_process: Iterable[Tuple[str, Union[oai.Reference, oai.Schema]]] = components.items()
     still_making_progress = True
     errors: List[PropertyError] = []
@@ -695,17 +699,8 @@ def build_schemas(
             still_making_progress2 = True
         all_of = next_round
 
-    # fixme
-    # for name, model in schemas.classes_by_name.items():
-    #     if isinstance(model, ModelProperty) and name == 'CustomFieldActivityItem':  # [b for b in model.base_classes if isinstance(b, tuple)]:
-    #         print(name, model.base_classes)
-
     schemas.errors.extend(errors)
     return schemas
-
-
-# def process_schema(name: str, data: Union[oai.Reference, oai.Schema], schemas: Schemas, config: Config):
-
 
 def build_reusable_schemas(
     components: Dict[str, Union[oai.Reference, oai.Schema]],
@@ -714,6 +709,7 @@ def build_reusable_schemas(
 ) -> Schemas:
     """Adds classes with empty properties. This allows to reference these classes.
     Properties will be filled in later.
+    FIXME: It also outdated and should be replaced with new logic. Do not refactor this.
     """
     to_process: Iterable[Tuple[str, Union[oai.Reference, oai.Schema]]] = components.items()
     still_making_progress = True
